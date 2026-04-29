@@ -1,0 +1,43 @@
+{
+  "name": "awshrflow",
+  "version": "1.5.0",
+  "description": "AWSHRFlow HR and Payroll Management System",
+  "main": "main.js",
+  "author": {
+     "name": "AWSHRFlow",
+     "email": "amitwebsolutioncompany@gmail.com"
+  },
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder"
+  },
+  "build": {
+    "appId": "com.awshrflow.app",
+    "productName": "AWSHRFlow",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "**/*"
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "assets/icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "AWSHRFlow"
+    }
+  },
+  "devDependencies": {
+    "electron": "^30.0.0",
+    "electron-builder": "^26.0.12"
+  },
+  "dependencies": {
+    "pdfkit": "^0.13.0",
+    "sqlite3": "^5.1.7"
+  }
+}

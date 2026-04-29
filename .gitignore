@@ -1,0 +1,75 @@
+# ===============================
+# Node / Electron
+# ===============================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ===============================
+# Electron build outputs
+# ===============================
+dist/
+build/
+out/
+release/
+*.exe
+*.msi
+*.dmg
+*.AppImage
+
+# ===============================
+# Electron runtime files
+# ===============================
+.cache/
+.electron/
+.electron-builder/
+
+# ===============================
+# Environment variables
+# ===============================
+.env
+.env.local
+.env.production
+
+# ===============================
+# Database (SQLite)
+# ===============================
+db/*.sqlite
+db/*.sqlite3
+db/*.db
+
+# If you want to keep empty db folder
+!db/.gitkeep
+
+# ===============================
+# Generated PDFs
+# ===============================
+db/*.pdf
+*.pdf
+
+# ===============================
+# Logs
+# ===============================
+logs/
+*.log
+
+# ===============================
+# OS / Editor junk
+# ===============================
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ===============================
+# VS Code / IDE
+# ===============================
+.vscode/
+.idea/
+*.swp
+
+# ===============================
+# Temp files
+# ===============================
+tmp/
+temp/

@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AWSHRFlow</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-shell">
+    <div class="nav">
+      <button class="tab-btn active" onclick="showPage('employee', this)">Employees</button>
+      <button class="tab-btn" onclick="showPage('company', this)">Company Setup</button>
+      <button class="tab-btn" onclick="showPage('payslip', this)">Payslip</button>
+      <button class="tab-btn" onclick="showPage('hr', this)">HR Documents</button>
+    </div>
+
+    <div id="employeePage" class="page">
+      <div class="layout full compact-app-grid">
+        <div class="card list-card">
+          <div class="card-title-row">
+            <div>
+              <div class="section-kicker">Master</div>
+              <h2>Employee List</h2>
+            </div>
+            <div class="mini-stat" id="employeeCountBadge">0 Employees</div>
+          </div>
+          <ul id="employeeList"></ul>
+        </div>
+
+        <div class="card form-card">
+          <div class="card-title-row">
+            <div>
+              <div class="section-kicker">Compact Editor</div>
+              <h2>Add / Edit Employee</h2>
+            </div>
+            <div class="status-badge">Fully Dynamic</div>
+          </div>
+
+          <form id="employeeForm">
+            <input type="hidden" id="empId">
+
+            <div class="form-grid dense three-col">
+              <div class="form-row">
+                <label for="name">Name</label>
+                <input id="name">
+              </div>
+
+              <div class="form-row">
+                <label for="employeeId">Employee ID</label>
+                <input id="employeeId">
+              </div>
+
+              <div class="form-row">
+                <label for="company">Company</label>
+                <select id="company"></select>
+              </div>
+
+              <div class="form-row">
+                <label for="designation">Designation</label>
+                <input id="designation">
+              </div>
+
+              <div class="form-row">
+                <label for="department">Department</label>
+                <input id="department">
+              </div>
+
+              <div class="form-row">
+                <label for="employmentType">Employment Type</label>
+                <input id="employmentType">
+              </div>
+
+              <div class="form-row">
+                <label for="doj">Joining Date</label>
+                <input type="date" id="doj">
+              </div>
+
+              <div class="form-row">
+                <label for="location">Location</label>
+                <input id="location">
+              </div>
+
+              <div class="form-row">
+                <label for="reportingManager">Reporting Manager</label>
+                <input id="reportingManager">
+              </div>
+
+              <div class="form-row">
+                <label for="mobileNumber">Mobile</label>
+                <input id="mobileNumber">
+              </div>
+
+              <div class="form-row">
+                <label for="email">Email</label>
+                <input id="email" type="email">
+              </div>
+
+              <div class="form-row">
+                <label for="emergencyContact">Emergency Contact</label>
+                <input id="emergencyContact">
+              </div>
+
+              <div class="form-row span-3">
+                <label for="address">Address</label>
+                <textarea id="address" rows="2"></textarea>
+              </div>
+
+              <div class="form-row">
+                <label for="bankName">Bank Name</label>
+                <input id="bankName">
+              </div>
+
+              <div class="form-row">
+                <label for="accountNumber">Account No</label>
+                <input id="accountNumber">
+              </div>
+
+              <div class="form-row">
+                <label for="ifsc">IFSC</label>
+                <input id="ifsc">
+              </div>
+
+              <div class="form-row">
+                <label for="pan">PAN</label>
+                <input id="pan">
+              </div>
+
+              <div class="form-row">
+                <label for="aadhaar">Aadhaar</label>
+                <input id="aadhaar">
+              </div>
+
+              <div class="form-row">
+                <label for="pfNo">PF No</label>
+                <input id="pfNo">
+              </div>
+
+              <div class="form-row">
+                <label for="pfUAN">UAN Number</label>
+                <input id="pfUAN">
+              </div>
+
+              <div class="form-row">
+                <label for="esiNo">ESIC No</label>
+                <input id="esiNo">
+              </div>
+
+              <div class="form-row">
+                <label for="basic">Basic</label>
+                <input type="number" id="basic">
+              </div>
+
+              <div class="form-row">
+                <label for="hra">HRA</label>
+                <input type="number" id="hra">
+              </div>
+
+              <div class="form-row">
+                <label for="specialAllowance">Special Allowance</label>
+                <input type="number" id="specialAllowance">
+              </div>
+
+              <div class="form-row">
+                <label for="bonus">Bonus</label>
+                <input type="number" id="bonus">
+              </div>
+
+              <div class="form-row">
+                <label for="ctc">CTC</label>
+                <input type="number" id="ctc" readonly>
+              </div>
+
+              <div class="form-row">
+                <label for="profilePhoto">Profile Photo</label>
+                <input type="file" id="profilePhoto" accept="image/*">
+              </div>
+
+              <div class="form-row span-3 dynamic-field-shell">
+                <div class="dynamic-field-head">
+                  <div class="dynamic-head-copy">
+                    <label class="dynamic-label">Additional Fields</label>
+                    <div class="dynamic-hint">Need more inputs? Add up to 4 custom employee fields.</div>
+                  </div>
+                  <button type="button" class="secondary-btn mini-btn" id="addEmployeeFieldBtn">Add Input Box</button>
+                </div>
+                <div id="employeeCustomFields" class="dynamic-field-list"></div>
+              </div>
+            </div>
+
+            <div class="button-row">
+              <button type="button" class="secondary-btn" id="resetEmployeeBtn">Clear</button>
+              <button class="primary-btn">Save Employee</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div id="companyPage" class="page" style="display:none">
+      <div class="layout full compact-app-grid">
+        <div class="card list-card">
+          <div class="card-title-row">
+            <div>
+              <div class="section-kicker">Dynamic Profiles</div>
+              <h2>Company Profiles</h2>
+            </div>
+            <div class="mini-stat" id="companyCountBadge">0 Companies</div>
+          </div>
+          <ul id="companyList"></ul>
+        </div>
+
+        <div class="card form-card">
+          <div class="card-title-row">
+            <div>
+              <div class="section-kicker">HRMS Source</div>
+              <h2>Create / Edit Company</h2>
+            </div>
+            <div class="status-badge">Multi Company CRUD</div>
+          </div>
+
+          <form id="companyForm">
+            <input type="hidden" id="companyRecordId">
+
+            <div class="form-grid dense three-col">
+              <div class="form-row">
+                <label for="companyCode">Code</label>
+                <input id="companyCode">
+              </div>
+
+              <div class="form-row">
+                <label for="companyDisplayName">Display Name</label>
+                <input id="companyDisplayName">
+              </div>
+
+              <div class="form-row">
+                <label for="companyLegalName">Legal Name</label>
+                <input id="companyLegalName">
+              </div>
+
+              <div class="form-row span-3">
+                <label for="companyAddress">Address</label>
+                <textarea id="companyAddress" rows="2"></textarea>
+              </div>
+
+              <div class="form-row">
+                <label for="companyCity">City</label>
+                <input id="companyCity">
+              </div>
+
+              <div class="form-row">
+                <label for="companyState">State</label>
+                <input id="companyState">
+              </div>
+
+              <div class="form-row">
+                <label for="companyCountry">Country</label>
+                <input id="companyCountry" value="India">
+              </div>
+
+              <div class="form-row">
+                <label for="companyPostalCode">Postal Code</label>
+                <input id="companyPostalCode">
+              </div>
+
+              <div class="form-row">
+                <label for="companyPhone">Phone</label>
+                <input id="companyPhone">
+              </div>
+
+              <div class="form-row">
+                <label for="companyEmail">Email</label>
+                <input id="companyEmail" type="email">
+              </div>
+
+              <div class="form-row">
+                <label for="companyWebsite">Website</label>
+                <input id="companyWebsite">
+              </div>
+
+              <div class="form-row">
+                <label for="companyContactPerson">Contact Person</label>
+                <input id="companyContactPerson">
+              </div>
+
+              <div class="form-row">
+                <label for="companyHrName">HR Name</label>
+                <input id="companyHrName">
+              </div>
+
+              <div class="form-row">
+                <label for="companyDirectorName">Director Name</label>
+                <input id="companyDirectorName">
+              </div>
+
+              <div class="form-row">
+                <label for="companyCin">CIN / LLPIN</label>
+                <input id="companyCin">
+              </div>
+
+              <div class="form-row">
+                <label for="companyGstin">GSTIN</label>
+                <input id="companyGstin">
+              </div>
+
+              <div class="form-row">
+                <label for="companyPan">Company PAN</label>
+                <input id="companyPan">
+              </div>
+
+              <div class="form-row">
+                <label for="companyTan">TAN</label>
+                <input id="companyTan">
+              </div>
+
+              <div class="form-row">
+                <label for="companyPfRegistrationNo">PF Registration</label>
+                <input id="companyPfRegistrationNo">
+              </div>
+
+              <div class="form-row">
+                <label for="companyEsicRegistrationNo">ESIC Registration</label>
+                <input id="companyEsicRegistrationNo">
+              </div>
+
+              <div class="form-row">
+                <label for="companyBankName">Company Bank</label>
+                <input id="companyBankName">
+              </div>
+
+              <div class="form-row">
+                <label for="companyBankAccountNumber">Company Account</label>
+                <input id="companyBankAccountNumber">
+              </div>
+
+              <div class="form-row">
+                <label for="companyIfsc">Company IFSC</label>
+                <input id="companyIfsc">
+              </div>
+
+              <div class="form-row">
+                <label for="companyPaymentMode">Payment Mode</label>
+                <input id="companyPaymentMode" value="Bank Transfer">
+              </div>
+
+              <div class="form-row">
+                <label for="defaultPfAmount">Default PF Amount</label>
+                <input type="number" id="defaultPfAmount">
+              </div>
+
+              <div class="form-row">
+                <label for="defaultPtAmount">Default PT Amount</label>
+                <input type="number" id="defaultPtAmount">
+              </div>
+
+              <div class="form-row checkbox-row">
+                <label for="defaultPfEnabled">Default PF</label>
+                <input type="checkbox" id="defaultPfEnabled">
+              </div>
+
+              <div class="form-row checkbox-row">
+                <label for="defaultPtEnabled">Default PT</label>
+                <input type="checkbox" id="defaultPtEnabled">
+              </div>
+
+              <div class="form-row">
+                <label for="companyLogo">Company Logo</label>
+                <input type="file" id="companyLogo" accept="image/*">
+              </div>
+
+              <div class="form-row">
+                <label for="companyStamp">Company Stamp</label>
+                <input type="file" id="companyStamp" accept="image/*">
+              </div>
+
+              <div class="form-row">
+                <label for="companySignature">Director Signature</label>
+                <input type="file" id="companySignature" accept="image/*">
+              </div>
+
+              <div class="form-row span-3">
+                <label for="companyPayslipNote">Payslip Note</label>
+                <textarea id="companyPayslipNote" rows="2"></textarea>
+              </div>
+
+              <div class="form-row span-3">
+                <label for="companyDocumentFooter">Document Footer</label>
+                <textarea id="companyDocumentFooter" rows="2"></textarea>
+              </div>
+
+              <div class="form-row span-3 dynamic-field-shell">
+                <div class="dynamic-field-head">
+                  <div>
+                    <label class="dynamic-label">Additional Fields</label>
+                    <div class="dynamic-hint">Need more inputs? Add up to 4 custom company fields.</div>
+                  </div>
+                  <button type="button" class="secondary-btn mini-btn" id="addCompanyFieldBtn">Add Input Box</button>
+                </div>
+                <div id="companyCustomFields" class="dynamic-field-list"></div>
+              </div>
+            </div>
+
+            <div class="button-row">
+              <button type="button" class="secondary-btn" id="resetCompanyBtn">Clear</button>
+              <button class="primary-btn">Save Company</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div id="payslipPage" class="page" style="display:none">
+      <div class="layout full payslip-layout">
+        <div class="card form-card">
+          <div class="card-title-row">
+            <div>
+              <div class="section-kicker">Live Generator</div>
+              <h2>Generate Payslip</h2>
+            </div>
+            <div class="status-badge">Company Driven</div>
+          </div>
+
+          <form id="payslipForm">
+            <div class="form-grid dense two-col">
+              <div class="form-row">
+                <label for="employeeSelect">Employee</label>
+                <select id="employeeSelect"></select>
+              </div>
+
+              <div class="form-row">
+                <label for="monthSelect">Month</label>
+                <select id="monthSelect">
+                  <option value="1">January</option>
+                  <option value="2">February</option>
+                  <option value="3">March</option>
+                  <option value="4">April</option>
+                  <option value="5">May</option>
+                  <option value="6">June</option>
+                  <option value="7">July</option>
+                  <option value="8">August</option>
+                  <option value="9">September</option>
+                  <option value="10">October</option>
+                  <option value="11">November</option>
+                  <option value="12">December</option>
+                </select>
+              </div>
+
+              <div class="form-row">
+                <label for="yearSelect">Year</label>
+                <input type="number" id="yearSelect">
+              </div>
+
+              <div class="form-row">
+                <label for="attendance">Present Days</label>
+                <input type="number" id="attendance">
+              </div>
+
+              <div class="form-row">
+                <label for="extraAllowance">Extra Allowance</label>
+                <input type="number" id="extraAllowance" value="0">
+              </div>
+
+              <div class="form-row">
+                <label for="tdsOverride">TDS Override</label>
+                <input type="number" id="tdsOverride" value="0">
+              </div>
+
+              <div class="form-row checkbox-row">
+                <label class="inline-check" for="pfCheck">
+                  <span>PF Deduction</span>
+                  <input type="checkbox" id="pfCheck">
+                </label>
+              </div>
+
+              <div class="form-row checkbox-row">
+                <label class="inline-check" for="ptCheck">
+                  <span>PT Deduction</span>
+                  <input type="checkbox" id="ptCheck">
+                </label>
+              </div>
+            </div>
+
+            <div class="deduction-hint">
+              <span id="pfStatus">PF: NO</span>
+              <span id="ptStatus">PT: NO</span>
+            </div>
+
+            <div class="button-row">
+              <button class="primary-btn">Generate Payslip</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="card preview-card" id="payslipPreview" style="display:none;">
+          <div class="preview-brand-bar">
+            <div class="preview-logo-box" id="previewCompanyLogoWrap">
+              <img id="previewCompanyLogo" alt="Company Logo">
+              <span id="previewLogoFallback">CO</span>
+            </div>
+            <div>
+              <h2 id="pCompanyName"></h2>
+              <div class="preview-subtitle">Payslip for <span id="pMonthYear"></span></div>
+            </div>
+          </div>
+
+          <div class="preview-grid three compact-preview-grid">
+            <div class="info-panel">
+              <h4>Employee</h4>
+              <table>
+                <tr><td>Name</td><td id="pName"></td></tr>
+                <tr><td>Employee ID</td><td id="pEmpId"></td></tr>
+                <tr><td>Designation</td><td id="pDesig"></td></tr>
+                <tr><td>Department</td><td id="pDept"></td></tr>
+                <tr><td>Joining Date</td><td id="pDoj"></td></tr>
+                <tr><td>Location</td><td id="pLocation"></td></tr>
+                <tr><td>Contact</td><td id="pContact"></td></tr>
+              </table>
+            </div>
+
+            <div class="info-panel">
+              <h4>Company</h4>
+              <table>
+                <tr><td>Legal Name</td><td id="cName"></td></tr>
+                <tr><td>Address</td><td id="cAddress" class="preserve-lines"></td></tr>
+                <tr><td>Phone</td><td id="cPhone"></td></tr>
+                <tr><td>Email</td><td id="cEmail"></td></tr>
+                <tr><td>Website</td><td id="cWebsite"></td></tr>
+                <tr><td>GSTIN</td><td id="cGstin"></td></tr>
+                <tr><td>PF Reg.</td><td id="cPfReg"></td></tr>
+              </table>
+            </div>
+
+            <div class="info-panel">
+              <h4>Compliance</h4>
+              <table>
+                <tr><td>PAN</td><td id="pPan"></td></tr>
+                <tr><td>PF Number</td><td id="pPfNo"></td></tr>
+                <tr><td>UAN Number</td><td id="pUan"></td></tr>
+                <tr><td>ESIC Number</td><td id="pEsi"></td></tr>
+                <tr><td>Bank</td><td id="pBank"></td></tr>
+                <tr><td>Account</td><td id="pAcc"></td></tr>
+                <tr><td>IFSC</td><td id="pIfsc"></td></tr>
+              </table>
+            </div>
+          </div>
+
+          <div class="preview-grid two compact-preview-grid">
+            <div>
+              <h4>Earnings</h4>
+              <table class="earning-table">
+                <tr class="head">
+                  <td>Component</td>
+                  <td>Full</td>
+                  <td>Actual</td>
+                </tr>
+                <tr>
+                  <td>Basic</td>
+                  <td id="eBasicFull"></td>
+                  <td id="eBasicActual"></td>
+                </tr>
+                <tr>
+                  <td>HRA</td>
+                  <td id="eHraFull"></td>
+                  <td id="eHraActual"></td>
+                </tr>
+                <tr>
+                  <td>Special Allowance</td>
+                  <td id="eSplFull"></td>
+                  <td id="eSplActual"></td>
+                </tr>
+                <tr>
+                  <td>Extra Allowance</td>
+                  <td id="eExtraFull"></td>
+                  <td id="eExtraActual"></td>
+                </tr>
+                <tr class="bold">
+                  <td>Total Earnings</td>
+                  <td id="eTotalFull"></td>
+                  <td id="eTotalActual"></td>
+                </tr>
+              </table>
+            </div>
+
+            <div>
+              <h4>Deductions & Attendance</h4>
+              <table>
+                <tr><td>Provident Fund</td><td id="dPf"></td></tr>
+                <tr><td>Professional Tax</td><td id="dPt"></td></tr>
+                <tr><td>TDS</td><td id="dTds"></td></tr>
+                <tr class="bold"><td>Total Deductions</td><td id="dTotal"></td></tr>
+                <tr><td>Total Days</td><td id="aTotal"></td></tr>
+                <tr><td>Present Days</td><td id="aPresent"></td></tr>
+                <tr><td>Absent Days</td><td id="aAbsent"></td></tr>
+                <tr><td>Pay Period</td><td id="pPeriod"></td></tr>
+                <tr><td>Payment Mode</td><td id="pPaymentMode"></td></tr>
+              </table>
+            </div>
+          </div>
+
+          <div class="preview-note-box">
+            <div class="preview-net">
+              Net Salary Payable : Rs. <span id="pNet"></span>
+            </div>
+            <div class="preview-small">
+              Days Paid : <span id="pDays"></span>
+            </div>
+            <div class="preview-note preserve-lines" id="payslipNote"></div>
+          </div>
+
+          <div class="preview-actions">
+            <button id="downloadPdfBtn" class="pdf-btn">Generate PDF</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="hrPage" class="page" style="display:none">
+      <div class="hr-layout compact-hr-layout">
+        <div class="card hr-hero-card">
+          <div class="section-kicker">HR Document Templates</div>
+          <h1>Compact premium HR workspace with editable MNC-style company driven templates</h1>
+          <p>Choose employee, select document, pick a design, edit every field, preview live, and export polished PDF from fully dynamic data.</p>
+        </div>
+
+        <div class="card">
+          <div class="section-head">
+            <div>
+              <div class="section-kicker">Step 2</div>
+              <h2>Document Type Selection</h2>
+            </div>
+            <p class="muted-copy">Production-ready HR, compliance, salary, and exit documents.</p>
+          </div>
+          <div id="hrDocumentTypeGrid" class="hr-doc-grid"></div>
+        </div>
+
+        <div class="card">
+          <div class="section-head">
+            <div>
+              <div class="section-kicker">Step 3</div>
+              <h2>Template Gallery</h2>
+            </div>
+            <p class="muted-copy">Compact royal designs optimized for one-screen workflow.</p>
+          </div>
+          <div id="hrTemplateGallery" class="hr-template-grid"></div>
+        </div>
+
+        <div class="card hr-workflow-card">
+          <div class="hr-step-grid compact-step-grid">
+            <div class="step-pill active">1. Employee</div>
+            <div class="step-pill">2. Document</div>
+            <div class="step-pill">3. Template</div>
+            <div class="step-pill">4. Form</div>
+            <div class="step-pill">5. Preview</div>
+          </div>
+
+          <div class="hr-toolbar">
+            <div class="form-row single compact">
+              <label for="hrEmployeeSelect">Employee</label>
+              <select id="hrEmployeeSelect"></select>
+            </div>
+
+            <div class="hr-selection-summary" id="hrSelectionSummary">
+              Select an employee to begin the HR document workflow.
+            </div>
+          </div>
+        </div>
+
+        <div class="layout full hr-editor-layout">
+          <div class="card">
+            <div class="section-head">
+              <div>
+                <div class="section-kicker">Step 4</div>
+                <h2>Editable Document Form</h2>
+              </div>
+              <p class="muted-copy">Every field stays editable before final PDF.</p>
+            </div>
+            <div class="hr-form-topbar">
+              <div class="hr-form-status" id="hrFormStatus">
+                Select employee, document, and template to auto-fill the form.
+              </div>
+              <div class="hr-form-actions">
+                <button id="hrReloadTemplateBtn" type="button" class="secondary-btn">Reload Template Text</button>
+                <button id="hrResetFormBtn" type="button" class="secondary-btn">Reset Form</button>
+              </div>
+            </div>
+            <form id="hrDocumentForm" class="hr-form-shell">
+              <div id="hrFormFields" class="hr-form-grid"></div>
+            </form>
+          </div>
+
+          <div class="card">
+            <div class="section-head">
+              <div>
+                <div class="section-kicker">Step 5</div>
+                <h2>Preview Final Document</h2>
+              </div>
+              <div class="preview-actions">
+                <button id="downloadHrPdfBtn" class="pdf-btn">Download PDF</button>
+              </div>
+            </div>
+            <div id="hrPreviewMeta" class="hr-preview-meta">Choose a document template to see the generated preview.</div>
+            <div id="hrPreviewViewport" class="hr-preview-viewport"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="hrDocuments.js"></script>
+  <script src="renderer.js"></script>
+  <script>
+    function showPage(page, btn) {
+      document.getElementById('employeePage').style.display = page === 'employee' ? 'block' : 'none';
+      document.getElementById('companyPage').style.display = page === 'company' ? 'block' : 'none';
+      document.getElementById('payslipPage').style.display = page === 'payslip' ? 'block' : 'none';
+      document.getElementById('hrPage').style.display = page === 'hr' ? 'block' : 'none';
+      document.querySelectorAll('.tab-btn').forEach((b) => b.classList.remove('active'));
+      btn.classList.add('active');
+    }
+  </script>
+</body>
+</html>

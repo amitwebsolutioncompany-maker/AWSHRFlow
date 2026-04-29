@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Payslip</title>
+  <link rel="stylesheet" href="pdf.css">
+</head>
+<body>
+  <div class="page-shell">
+    <div class="page-outline">
+      <div class="page-watermark">{{COMPANY_LEGAL_NAME}}</div>
+      <section class="hero">
+        <div class="hero-top">
+          <div class="brand-block">
+            <div class="logo-wrap">
+              {{COMPANY_LOGO}}
+            </div>
+            <div class="brand-copy">
+              <p class="eyebrow">Salary Statement</p>
+              <h1 class="company">{{COMPANY_NAME}}</h1>
+              <p class="title">Payslip for {{MONTH_YEAR}}</p>
+            </div>
+          </div>
+
+          <div class="hero-chip">
+            <span class="chip-label">Net Salary</span>
+            <span class="chip-value">Rs. {{NET}}</span>
+          </div>
+        </div>
+
+        <div class="hero-summary">
+          <div class="summary-item">
+            <span class="summary-label">Employee ID</span>
+            <strong class="summary-value">{{EMPID}}</strong>
+          </div>
+          <div class="summary-item">
+            <span class="summary-label">Pay Period</span>
+            <strong class="summary-value">{{MONTH_YEAR}}</strong>
+          </div>
+          <div class="summary-item">
+            <span class="summary-label">Present Days</span>
+            <strong class="summary-value">{{PRESENT_DAYS}}</strong>
+          </div>
+          <div class="summary-item">
+            <span class="summary-label">Total Deductions</span>
+            <strong class="summary-value">Rs. {{DED_TOTAL}}</strong>
+          </div>
+        </div>
+      </section>
+
+      <section class="details-grid spacer">
+        <div class="info-card">
+          <div class="card-head">
+            <h3>Employee Details</h3>
+          </div>
+          <div class="info-list">
+            <div class="info-row"><span class="info-label">Name</span><span class="info-value">{{NAME}}</span></div>
+            <div class="info-row"><span class="info-label">Employee ID</span><span class="info-value">{{EMPID}}</span></div>
+            <div class="info-row"><span class="info-label">Designation</span><span class="info-value">{{DESIGNATION}}</span></div>
+            <div class="info-row"><span class="info-label">Department</span><span class="info-value">{{DEPARTMENT}}</span></div>
+            <div class="info-row"><span class="info-label">Date of Joining</span><span class="info-value">{{DOJ}}</span></div>
+            <div class="info-row"><span class="info-label">Location</span><span class="info-value">{{LOCATION}}</span></div>
+            <div class="info-row"><span class="info-label">PAN</span><span class="info-value">{{PAN}}</span></div>
+            <div class="info-row"><span class="info-label">PF Number</span><span class="info-value">{{PF}}</span></div>
+            <div class="info-row"><span class="info-label">UAN</span><span class="info-value">{{UAN}}</span></div>
+          </div>
+        </div>
+
+        <div class="info-card">
+          <div class="card-head">
+            <h3>Company Details</h3>
+          </div>
+          <div class="info-list">
+            <div class="info-row"><span class="info-label">Company Name</span><span class="info-value">{{COMPANY_NAME}}</span></div>
+            <div class="info-row"><span class="info-label">Legal Name</span><span class="info-value">{{COMPANY_LEGAL_NAME}}</span></div>
+            <div class="info-row info-row-top"><span class="info-label">Address</span><span class="info-value preserve-lines">{{COMPANY_ADDRESS}}</span></div>
+            <div class="info-row"><span class="info-label">Email</span><span class="info-value">{{COMPANY_EMAIL}}</span></div>
+            <div class="info-row"><span class="info-label">Contact</span><span class="info-value">{{COMPANY_PHONE}}</span></div>
+            <div class="info-row"><span class="info-label">Website</span><span class="info-value">{{COMPANY_WEBSITE}}</span></div>
+            <div class="info-row"><span class="info-label">GSTIN</span><span class="info-value">{{COMPANY_GSTIN}}</span></div>
+            <div class="info-row"><span class="info-label">PF Reg.</span><span class="info-value">{{COMPANY_PF_REG}}</span></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="salary-grid spacer">
+        <div class="table-card table-card-wide">
+          <div class="card-head">
+            <h3>Earnings</h3>
+          </div>
+          <table class="salary-table">
+            <thead>
+              <tr>
+                <th>Component</th>
+                <th>Full Month Amount</th>
+                <th>Actual Amount</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Basic Salary</td>
+                <td>Rs. {{BASIC}}</td>
+                <td>Rs. {{BASIC_A}}</td>
+              </tr>
+              <tr>
+                <td>House Rent Allowance</td>
+                <td>Rs. {{HRA}}</td>
+                <td>Rs. {{HRA_A}}</td>
+              </tr>
+              <tr>
+                <td>Special Allowance</td>
+                <td>Rs. {{SPL}}</td>
+                <td>Rs. {{SPL_A}}</td>
+              </tr>
+              <tr>
+                <td>Extra Allowance</td>
+                <td>Rs. {{EXTRA}}</td>
+                <td>Rs. {{EXTRA_A}}</td>
+              </tr>
+              <tr class="total-row">
+                <td>Total Earnings</td>
+                <td>Rs. {{TOTAL_FULL}}</td>
+                <td>Rs. {{TOTAL_ACTUAL}}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="table-card">
+          <div class="card-head card-head-danger">
+            <h3>Deductions</h3>
+          </div>
+          <table class="compact-table">
+            <tbody>
+              <tr><td>Provident Fund (PF)</td><td>Rs. {{PF_AMT}}</td></tr>
+              <tr><td>Professional Tax (PT)</td><td>Rs. {{PT}}</td></tr>
+              <tr><td>Tax Deducted at Source (TDS)</td><td>Rs. {{TDS}}</td></tr>
+              <tr class="total-row"><td>Total Deductions</td><td>Rs. {{DED_TOTAL}}</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="details-grid spacer">
+        <div class="info-card">
+          <div class="card-head">
+            <h3>Payment Details</h3>
+          </div>
+          <div class="info-list">
+            <div class="info-row"><span class="info-label">Bank Name</span><span class="info-value">{{BANK}}</span></div>
+            <div class="info-row"><span class="info-label">Account Number</span><span class="info-value">{{ACCOUNT}}</span></div>
+            <div class="info-row"><span class="info-label">IFSC Code</span><span class="info-value">{{IFSC}}</span></div>
+            <div class="info-row"><span class="info-label">Pay Period</span><span class="info-value">{{MONTH_YEAR}}</span></div>
+            <div class="info-row"><span class="info-label">Payment Mode</span><span class="info-value">{{PAYMENT_MODE}}</span></div>
+          </div>
+        </div>
+
+        <div class="info-card">
+          <div class="card-head">
+            <h3>Attendance Summary</h3>
+          </div>
+          <div class="info-list">
+            <div class="info-row"><span class="info-label">Total Days</span><span class="info-value">{{TOTAL_DAYS}}</span></div>
+            <div class="info-row"><span class="info-label">Present Days</span><span class="info-value accent-positive">{{PRESENT_DAYS}}</span></div>
+            <div class="info-row"><span class="info-label">Absent Days</span><span class="info-value accent-danger">{{ABSENT_DAYS}}</span></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="net-final spacer">
+        <p class="net-caption">Net Salary Payable</p>
+        <div class="net-amount-final">Rs. {{NET}}</div>
+        <div class="net-words-final">{{NET_WORDS}}</div>
+      </section>
+
+      <p class="footer">
+        {{PAYSLIP_NOTE}}
+      </p>
+    </div>
+  </div>
+</body>
+</html>
