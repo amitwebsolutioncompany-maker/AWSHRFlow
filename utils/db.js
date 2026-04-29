@@ -193,6 +193,29 @@ const EMPLOYEE_COLUMNS = [
   ['updatedAt', 'TEXT DEFAULT CURRENT_TIMESTAMP']
 ];
 
+const POLICY_COLUMNS = [
+  ['companyId', 'INTEGER'],
+  ['policyType', 'TEXT'],
+  ['policyCode', 'TEXT'],
+  ['title', 'TEXT'],
+  ['version', 'TEXT'],
+  ['effectiveDate', 'TEXT'],
+  ['reviewDate', 'TEXT'],
+  ['ownerDepartment', 'TEXT'],
+  ['approverName', 'TEXT'],
+  ['status', 'TEXT'],
+  ['summary', 'TEXT'],
+  ['purpose', 'TEXT'],
+  ['scope', 'TEXT'],
+  ['applicability', 'TEXT'],
+  ['policyRules', 'TEXT'],
+  ['workflow', 'TEXT'],
+  ['exceptions', 'TEXT'],
+  ['disciplinaryAction', 'TEXT'],
+  ['createdAt', 'TEXT DEFAULT CURRENT_TIMESTAMP'],
+  ['updatedAt', 'TEXT DEFAULT CURRENT_TIMESTAMP']
+];
+
 function run(sql, params = []) {
   return new Promise((resolve, reject) => {
     db.run(sql, params, function onRun(err) {
@@ -227,6 +250,12 @@ function get(sql, params = []) {
       resolve(row);
     });
   });
+}
+
+function buildEmployeeIdPrefix(companyCode) {
+  return String(companyCode || '')
+    .toUpperCase()
+    .replace(/[^A-Z0-9]/g, '');
 }
 
 async function ensureColumns(tableName, columns) {
@@ -331,8 +360,15 @@ async function initDatabase() {
     )
   `);
 
+  await run(`
+    CREATE TABLE IF NOT EXISTS policies (
+      id INTEGER PRIMARY KEY AUTOINCREMENT
+    )
+  `);
+
   await ensureColumns('companies', COMPANY_COLUMNS);
   await ensureColumns('employees', EMPLOYEE_COLUMNS);
+  await ensureColumns('policies', POLICY_COLUMNS);
   await seedDefaultCompanies();
   await backfillEmployeeCompanyIds();
   await ensureIndexes();
@@ -496,7 +532,103 @@ function updateCompany(company) {
 
 async function deleteCompany(id) {
   await run('UPDATE employees SET companyId = NULL, company = "", updatedAt = CURRENT_TIMESTAMP WHERE companyId = ?', [id]);
+  await run('UPDATE policies SET companyId = NULL, updatedAt = CURRENT_TIMESTAMP WHERE companyId = ?', [id]);
   return run('DELETE FROM companies WHERE id = ?', [id]);
+}
+
+function getPolicies() {
+  return all(
+    `SELECT
+      policies.*,
+      companies.displayName AS companyName,
+      companies.code AS companyCode
+    FROM policies
+    LEFT JOIN companies ON companies.id = policies.companyId
+    ORDER BY policies.updatedAt DESC, policies.title COLLATE NOCASE`
+  );
+}
+
+function addPolicy(policy) {
+  return run(
+    `INSERT INTO policies (
+      companyId, policyType, policyCode, title, version, effectiveDate, reviewDate,
+      ownerDepartment, approverName, status, summary, purpose, scope, applicability,
+      policyRules, workflow, exceptions, disciplinaryAction, createdAt, updatedAt
+    ) VALUES (
+      ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
+    )`,
+    [
+      policy.companyId || null,
+      policy.policyType || '',
+      policy.policyCode || '',
+      policy.title || '',
+      policy.version || '1.0',
+      policy.effectiveDate || '',
+      policy.reviewDate || '',
+      policy.ownerDepartment || '',
+      policy.approverName || '',
+      policy.status || 'Draft',
+      policy.summary || '',
+      policy.purpose || '',
+      policy.scope || '',
+      policy.applicability || '',
+      policy.policyRules || '',
+      policy.workflow || '',
+      policy.exceptions || '',
+      policy.disciplinaryAction || ''
+    ]
+  ).then((result) => result.lastID);
+}
+
+function updatePolicy(policy) {
+  return run(
+    `UPDATE policies SET
+      companyId = ?,
+      policyType = ?,
+      policyCode = ?,
+      title = ?,
+      version = ?,
+      effectiveDate = ?,
+      reviewDate = ?,
+      ownerDepartment = ?,
+      approverName = ?,
+      status = ?,
+      summary = ?,
+      purpose = ?,
+      scope = ?,
+      applicability = ?,
+      policyRules = ?,
+      workflow = ?,
+      exceptions = ?,
+      disciplinaryAction = ?,
+      updatedAt = CURRENT_TIMESTAMP
+    WHERE id = ?`,
+    [
+      policy.companyId || null,
+      policy.policyType || '',
+      policy.policyCode || '',
+      policy.title || '',
+      policy.version || '1.0',
+      policy.effectiveDate || '',
+      policy.reviewDate || '',
+      policy.ownerDepartment || '',
+      policy.approverName || '',
+      policy.status || 'Draft',
+      policy.summary || '',
+      policy.purpose || '',
+      policy.scope || '',
+      policy.applicability || '',
+      policy.policyRules || '',
+      policy.workflow || '',
+      policy.exceptions || '',
+      policy.disciplinaryAction || '',
+      policy.id
+    ]
+  );
+}
+
+function deletePolicy(id) {
+  return run('DELETE FROM policies WHERE id = ?', [id]);
 }
 
 function getEmployees() {
@@ -514,8 +646,41 @@ function getEmployees() {
   );
 }
 
-function addEmployee(employee) {
-  return run(
+async function getNextEmployeeId(companyId, excludeEmployeeRecordId = null) {
+  if (!companyId) {
+    return '';
+  }
+
+  const company = await get('SELECT code FROM companies WHERE id = ?', [companyId]);
+  const prefix = buildEmployeeIdPrefix(company?.code);
+  if (!prefix) {
+    return '';
+  }
+
+  const employees = excludeEmployeeRecordId
+    ? await all('SELECT employeeId FROM employees WHERE companyId = ? AND id != ?', [companyId, excludeEmployeeRecordId])
+    : await all('SELECT employeeId FROM employees WHERE companyId = ?', [companyId]);
+
+  const employeeIdPattern = new RegExp(`^${prefix}(\\d+)$`);
+  let maxSequence = 0;
+
+  employees.forEach(({ employeeId }) => {
+    const match = String(employeeId || '').toUpperCase().match(employeeIdPattern);
+    if (!match) {
+      return;
+    }
+
+    maxSequence = Math.max(maxSequence, Number(match[1]) || 0);
+  });
+
+  return `${prefix}${String(maxSequence + 1).padStart(3, '0')}`;
+}
+
+async function addEmployee(employee) {
+  const resolvedEmployeeId = employee.employeeId?.trim()
+    || await getNextEmployeeId(employee.companyId);
+
+  const result = await run(
     `INSERT INTO employees (
       name, employeeId, designation, department, company, companyId, doj, location,
       bankName, accountNumber, ifsc, pfNo, pfUAN, esiNo, pan, basic, hra,
@@ -526,7 +691,7 @@ function addEmployee(employee) {
     )`,
     [
       employee.name,
-      employee.employeeId,
+      resolvedEmployeeId,
       employee.designation,
       employee.department,
       employee.company || '',
@@ -555,10 +720,15 @@ function addEmployee(employee) {
       employee.profilePhoto || '',
       employee.customFields || '[]'
     ]
-  ).then((result) => result.lastID);
+  );
+
+  return result.lastID;
 }
 
-function updateEmployee(employee) {
+async function updateEmployee(employee) {
+  const resolvedEmployeeId = employee.employeeId?.trim()
+    || await getNextEmployeeId(employee.companyId, employee.id);
+
   return run(
     `UPDATE employees SET
       name = ?,
@@ -594,7 +764,7 @@ function updateEmployee(employee) {
     WHERE id = ?`,
     [
       employee.name,
-      employee.employeeId,
+      resolvedEmployeeId,
       employee.designation,
       employee.department,
       employee.company || '',
@@ -637,7 +807,12 @@ module.exports = {
   addCompany,
   updateCompany,
   deleteCompany,
+  getPolicies,
+  addPolicy,
+  updatePolicy,
+  deletePolicy,
   getEmployees,
+  getNextEmployeeId,
   addEmployee,
   updateEmployee,
   deleteEmployee

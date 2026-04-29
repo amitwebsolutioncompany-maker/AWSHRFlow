@@ -1,7 +1,9 @@
 const fs = require('fs');
 const path = require('path');
 const { app, BrowserWindow, dialog, ipcMain, shell } = require('electron');
+const QRCode = require('qrcode');
 const db = require('./utils/db');
+const authStore = require('./utils/authStore');
 
 function createWindow() {
   const win = new BrowserWindow({
@@ -32,6 +34,7 @@ async function exportHtmlToPdf({
 
     const pdfBuffer = await win.webContents.printToPDF({
       printBackground: true,
+      preferCSSPageSize: true,
       pageSize: 'A4',
       margins: { top: 0, bottom: 0, left: 0, right: 0 }
     });
@@ -73,6 +76,9 @@ app.whenReady()
   .then(async () => {
     await db.init();
     createWindow();
+    authStore.init().catch((error) => {
+      console.error('Background auth init failed:', error);
+    });
   })
   .catch((error) => {
     console.error('App startup failed:', error);
@@ -83,10 +89,26 @@ ipcMain.handle('get-companies', () => db.getCompanies());
 ipcMain.handle('add-company', (event, company) => db.addCompany(company));
 ipcMain.handle('update-company', (event, company) => db.updateCompany(company));
 ipcMain.handle('delete-company', (event, id) => db.deleteCompany(id));
+ipcMain.handle('get-policies', () => db.getPolicies());
+ipcMain.handle('add-policy', (event, policy) => db.addPolicy(policy));
+ipcMain.handle('update-policy', (event, policy) => db.updatePolicy(policy));
+ipcMain.handle('delete-policy', (event, id) => db.deletePolicy(id));
 ipcMain.handle('get-employees', () => db.getEmployees());
+ipcMain.handle('get-next-employee-id', (event, companyId, excludeEmployeeId) => db.getNextEmployeeId(companyId, excludeEmployeeId));
 ipcMain.handle('add-employee', (event, emp) => db.addEmployee(emp));
 ipcMain.handle('update-employee', (event, emp) => db.updateEmployee(emp));
 ipcMain.handle('delete-employee', (event, id) => db.deleteEmployee(id));
+ipcMain.handle('get-app-auth-status', () => authStore.getStatus());
+ipcMain.handle('verify-app-password', async (event, password) => authStore.verifyPassword(password));
+ipcMain.handle('generate-qr-data-url', (event, text) => QRCode.toDataURL(String(text || ''), {
+  errorCorrectionLevel: 'M',
+  margin: 1,
+  width: 220,
+  color: {
+    dark: '#0f172a',
+    light: '#ffffff'
+  }
+}));
 
 ipcMain.handle('generate-payslip-pdf', async (event, data) => {
   const htmlPath = path.join(__dirname, 'renderer/pdfTemplate.html');
@@ -122,6 +144,15 @@ ipcMain.handle('generate-hr-document-pdf', async (event, data) => {
     html: data.html,
     defaultFileName: data.fileName,
     subdirectory: 'HR Documents',
+    askForPath: true
+  });
+});
+
+ipcMain.handle('generate-id-card-pdf', async (event, data) => {
+  return exportHtmlToPdf({
+    html: data.html,
+    defaultFileName: data.fileName,
+    subdirectory: 'ID Cards',
     askForPath: true
   });
 });

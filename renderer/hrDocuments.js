@@ -42,6 +42,29 @@
     }
   ];
 
+  const TOP_FONT_FAMILIES = [
+    { value: 'Georgia, "Times New Roman", serif', label: 'Georgia' },
+    { value: '"Times New Roman", Times, serif', label: 'Times New Roman' },
+    { value: '"Garamond", serif', label: 'Garamond' },
+    { value: '"Palatino Linotype", "Book Antiqua", Palatino, serif', label: 'Palatino' },
+    { value: '"Baskerville", "Times New Roman", serif', label: 'Baskerville' },
+    { value: '"Cambria", serif', label: 'Cambria' },
+    { value: '"Didot", serif', label: 'Didot' },
+    { value: '"Bodoni MT", serif', label: 'Bodoni MT' },
+    { value: 'Arial, Helvetica, sans-serif', label: 'Arial' },
+    { value: 'Helvetica, Arial, sans-serif', label: 'Helvetica' },
+    { value: '"Trebuchet MS", sans-serif', label: 'Trebuchet MS' },
+    { value: 'Verdana, Geneva, sans-serif', label: 'Verdana' },
+    { value: '"Segoe UI", Tahoma, sans-serif', label: 'Segoe UI' },
+    { value: '"Tahoma", Geneva, sans-serif', label: 'Tahoma' },
+    { value: '"Gill Sans", "Gill Sans MT", sans-serif', label: 'Gill Sans' },
+    { value: '"Century Gothic", sans-serif', label: 'Century Gothic' },
+    { value: '"Franklin Gothic Medium", Arial, sans-serif', label: 'Franklin Gothic' },
+    { value: '"Bookman Old Style", serif', label: 'Bookman Old Style' },
+    { value: '"Lucida Sans", "Lucida Sans Unicode", sans-serif', label: 'Lucida Sans' },
+    { value: '"Courier New", Courier, monospace', label: 'Courier New' }
+  ];
+
   const FIELD_LIBRARY = {
     documentDate: { label: 'Document Date', type: 'date', group: 'Document' },
     effectiveDate: { label: 'Effective Date', type: 'date', group: 'Document' },
@@ -110,7 +133,8 @@
     templateParagraph2: { label: 'Template Paragraph 2', type: 'textarea', group: 'Template Copy' },
     templateParagraph3: { label: 'Template Paragraph 3', type: 'textarea', group: 'Template Copy' },
     templateBullets: { label: 'Template Bullet Points', type: 'textarea', group: 'Template Copy' },
-    templateClosing: { label: 'Template Closing', type: 'textarea', group: 'Template Copy' }
+    templateClosing: { label: 'Template Closing', type: 'textarea', group: 'Template Copy' },
+    fontFamily: { label: 'Font Family', type: 'select', options: TOP_FONT_FAMILIES, group: 'Template Copy' }
   };
 
   const DOCUMENT_DEFINITIONS = [
@@ -618,12 +642,16 @@
     if (['templateClosing', 'remarks'].includes(fieldId)) {
       return 'footer';
     }
+    if (fieldId === 'fontFamily') {
+      return 'header';
+    }
     return 'body';
   }
 
   function getTemplateFlowFieldIds(documentDefinition) {
-    const fieldIds = [...new Set([...documentDefinition.fields, ...TEMPLATE_COPY_FIELD_IDS])];
-    return fieldIds.sort((left, right) => {
+      const fieldIds = [...new Set([...documentDefinition.fields, ...TEMPLATE_COPY_FIELD_IDS])];
+      fieldIds.push('fontFamily');
+      return fieldIds.sort((left, right) => {
       const leftIndex = TEMPLATE_FLOW_ORDER.indexOf(left);
       const rightIndex = TEMPLATE_FLOW_ORDER.indexOf(right);
       const safeLeft = leftIndex === -1 ? Number.MAX_SAFE_INTEGER : leftIndex;
@@ -662,6 +690,22 @@
 
   function renderMultilineHtml(value) {
     return escapeHtml(value).replace(/\n/g, '<br>');
+  }
+
+  function parseCustomFields(rawValue) {
+    try {
+      const parsed = JSON.parse(rawValue || '[]');
+      return Array.isArray(parsed)
+        ? parsed
+            .map((field) => ({
+              label: String(field?.label || '').trim(),
+              value: String(field?.value || '').trim()
+            }))
+            .filter((field) => field.label || field.value)
+        : [];
+    } catch (error) {
+      return [];
+    }
   }
 
   function createTemplateCopyFields(content) {
@@ -783,6 +827,7 @@
         mobileNumber: employee?.mobileNumber || '',
         email: employee?.email || '',
         address: employee?.address || employee?.location || '',
+        employeeCustomFields: parseCustomFields(employee?.customFields),
         department: employee?.department || '',
         designation: employee?.designation || '',
         joiningDate: employee?.doj || '',
@@ -837,7 +882,8 @@
         companyStamp: company?.stampData || '',
         hrSignature: '',
         directorSignature: company?.signatureData || '',
-        profilePhoto: employee?.profilePhoto || ''
+        profilePhoto: employee?.profilePhoto || '',
+        fontFamily: TOP_FONT_FAMILIES[0].value
       };
 
       if (documentDefinition.id === 'increment-letter') {
@@ -1103,6 +1149,17 @@
         controlEl = document.createElement('textarea');
         controlEl.rows = field.group === 'Template Copy' ? 5 : 4;
         controlEl.value = String(value);
+      } else if (field.type === 'select') {
+        controlEl = document.createElement('select');
+        (field.options || []).forEach((optionConfig) => {
+          const optionEl = document.createElement('option');
+          optionEl.value = optionConfig.value;
+          optionEl.textContent = optionConfig.label;
+          if (String(optionConfig.value) === String(value)) {
+            optionEl.selected = true;
+          }
+          controlEl.appendChild(optionEl);
+        });
       } else {
         controlEl = document.createElement('input');
         controlEl.type = field.type;
@@ -1198,7 +1255,8 @@
       });
 
       els.previewViewport.innerHTML = state.previewHtml;
-      els.previewMeta.textContent = `${documentDefinition.name} preview using ${theme.name}`;
+      const selectedFont = TOP_FONT_FAMILIES.find((item) => item.value === state.formData.fontFamily)?.label || 'Custom Font';
+      els.previewMeta.textContent = `${documentDefinition.name} preview using ${theme.name} | Font: ${selectedFont}`;
     }
 
     function buildDocumentHtml(documentDefinition, theme, data, helpers) {
@@ -1233,6 +1291,18 @@
       const bulletsMarkup = content.bullets?.length
         ? `<ul class="document-list">${content.bullets.map((item) => `<li>${renderMultilineHtml(item)}</li>`).join('')}</ul>`
         : '';
+      const employeeCustomFieldsMarkup = Array.isArray(data.employeeCustomFields) && data.employeeCustomFields.length
+        ? `
+          <section class="document-panel document-panel-soft">
+            <h4>Additional Employee Inputs</h4>
+            <div class="record-grid">
+              ${data.employeeCustomFields.map((field) => `
+                <div><span>${escapeHtml(field.label || 'Custom Field')}</span><strong>${escapeHtml(field.value || '-')}</strong></div>
+              `).join('')}
+            </div>
+          </section>
+        `
+        : '';
 
       const topMeta = [
         ['Document Date', helpers.date(data.documentDate)],
@@ -1242,7 +1312,7 @@
       ];
 
       const html = `
-        <style>${buildDocumentCss(theme)}</style>
+        <style>${buildDocumentCss(theme, data)}</style>
         <div class="hr-document-page theme-${theme.id}">
           <div class="watermark">${escapeHtml(safeText(data.companyLegalName, data.companyName || 'Company'))}</div>
           <header class="document-header">
@@ -1298,6 +1368,7 @@
                 <p>${renderMultilineHtml(data.remarks)}</p>
               </section>
             ` : ''}
+            ${employeeCustomFieldsMarkup}
             <p class="closing-line">${renderMultilineHtml(content.closing)}</p>
             ${content.subject.includes('Settlement') ? `<p class="amount-words">Amount in words: ${escapeHtml(helpers.words(data.fAndFAmount || 0))}</p>` : ''}
           </main>
@@ -1341,7 +1412,7 @@
       `;
     }
 
-    function buildDocumentCss(theme) {
+    function buildDocumentCss(theme, data) {
       return `
         @page {
           size: A4;
@@ -1361,7 +1432,7 @@
             linear-gradient(165deg, rgba(255,255,255,0.98), rgba(255,255,255,0.93)),
             radial-gradient(circle at top right, ${theme.surface}, #ffffff 55%);
           color: var(--ink);
-          font-family: Georgia, "Times New Roman", serif;
+          font-family: ${data.fontFamily || 'Georgia, "Times New Roman", serif'};
           box-shadow: 0 28px 70px rgba(15, 23, 42, 0.16);
           overflow: visible;
           box-sizing: border-box;
@@ -1784,3 +1855,4 @@
     createHrDocumentsModule
   };
 })();
+

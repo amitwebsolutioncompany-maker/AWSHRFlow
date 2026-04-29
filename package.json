@@ -1,11 +1,11 @@
 {
   "name": "awshrflow",
-  "version": "1.5.0",
+  "version": "1.6.0",
   "description": "AWSHRFlow HR and Payroll Management System",
   "main": "main.js",
   "author": {
-     "name": "AWSHRFlow",
-     "email": "amitwebsolutioncompany@gmail.com"
+    "name": "AWSHRFlow",
+    "email": "amitwebsolutioncompany@gmail.com"
   },
   "scripts": {
     "start": "electron .",
@@ -37,7 +37,9 @@
     "electron-builder": "^26.0.12"
   },
   "dependencies": {
+    "mongodb": "^7.2.0",
     "pdfkit": "^0.13.0",
+    "qrcode": "^1.5.4",
     "sqlite3": "^5.1.7"
   }
 }

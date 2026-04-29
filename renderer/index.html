@@ -7,12 +7,56 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  <div id="appAuthOverlay" class="auth-overlay">
+    <div class="auth-dialog">
+      <div class="section-kicker">Secure Access</div>
+      <h2>AWSHRFlow Login</h2>
+      <p class="muted-copy">App open karne ke liye MongoDB me stored password enter karein.</p>
+      <form id="appAuthForm" class="auth-form">
+        <label for="appPasswordInput" class="auth-label">Password</label>
+        <input id="appPasswordInput" type="password" placeholder="Enter app password" autocomplete="current-password">
+        <button type="submit" class="primary-btn">Unlock App</button>
+      </form>
+      <div id="appAuthMessage" class="auth-message">Checking secure access...</div>
+    </div>
+  </div>
   <div class="app-shell">
     <div class="nav">
       <button class="tab-btn active" onclick="showPage('employee', this)">Employees</button>
       <button class="tab-btn" onclick="showPage('company', this)">Company Setup</button>
       <button class="tab-btn" onclick="showPage('payslip', this)">Payslip</button>
       <button class="tab-btn" onclick="showPage('hr', this)">HR Documents</button>
+      <button class="tab-btn" onclick="showPage('idCard', this)">ID Card Generator</button>
+      <button class="tab-btn" onclick="showPage('workspace', this)">HR Flow Hub</button>
+      <button class="tab-btn" onclick="showPage('policy', this)">Policy Management</button>
+    </div>
+
+    <div id="workspacePage" class="page" style="display:none">
+      <div class="workspace-grid">
+        <div class="card workspace-hero">
+          <div class="card-title-row">
+            <div>
+              <div class="section-kicker">Enterprise HR Control Tower</div>
+              <h2>AWSHRFlow MNC Operations Hub</h2>
+            </div>
+            <div class="status-badge">Live Dynamic Workspace</div>
+          </div>
+          <p class="muted-copy workspace-copy" id="workspaceHeroMeta">This workspace turns employee, company, payroll, documents, compliance, onboarding, and exit data into one connected operational cockpit.</p>
+          <div id="workspaceHeroStats" class="workspace-hero-stats"></div>
+          <div id="workspaceExecutionRail" class="workspace-execution-rail"></div>
+        </div>
+
+        <div class="card workspace-card"><div class="section-kicker">01</div><h3>Employee Master</h3><p>Single source of truth for employee profile, company mapping, payroll inputs, statutory IDs, and dynamic custom fields.</p><div class="workspace-link">Feeds: Payroll, HR Documents, Compliance, Appraisal, Exit</div></div>
+        <div class="card workspace-card"><div class="section-kicker">02</div><h3>Recruitment / Hiring</h3><p>Candidate stages, interview rounds, offer tracking, and one-click conversion into employee record plus onboarding.</p><div class="workspace-link">Feeds: Onboarding, HR Documents, Employee Master</div></div>
+        <div class="card workspace-card"><div class="section-kicker">03</div><h3>Onboarding</h3><p>Joining checklist, document collection, reporting manager, asset assignment, and activation workflow.</p><div class="workspace-link">Feeds: Employee Master, HR Documents, Asset Tracking</div></div>
+        <div class="card workspace-card"><div class="section-kicker">04</div><h3>Attendance &amp; Leave</h3><p>Present days, leave balances, approvals, holiday impact, late marks, and payroll-linked day calculation.</p><div class="workspace-link">Feeds: Payroll, Reports, Manager Dashboard</div></div>
+        <div class="card workspace-card"><div class="section-kicker">05</div><h3>Payroll</h3><p>Monthly salary processing, deductions, bonus, arrears, payment mode, and payslip output from live employee data.</p><div class="workspace-link">Feeds: Payslip, Compliance, Reports</div></div>
+        <div class="card workspace-card"><div class="section-kicker">06</div><h3>Statutory Compliance</h3><p>PF, ESI, PT, TDS, company registrations, employee statutory references, and challan-ready summaries.</p><div class="workspace-link">Feeds: Payroll, HR Documents, Audit Readiness</div></div>
+        <div class="card workspace-card"><div class="section-kicker">07</div><h3>HR Documents</h3><p>Offer, appointment, increment, promotion, warning, resignation, relieving, experience, and F&amp;F templates.</p><div class="workspace-link">Feeds from: Employee, Company, Payroll, Appraisal, Exit</div></div>
+        <div class="card workspace-card"><div class="section-kicker">08</div><h3>Performance / Appraisal</h3><p>KPI reviews, ratings, salary revision logic, and promotion recommendation workflow.</p><div class="workspace-link">Feeds: Payroll Revision, Promotion Letter, Reports</div></div>
+        <div class="card workspace-card"><div class="section-kicker">09</div><h3>Separation / Exit</h3><p>Resignation, notice period, clearance, asset return, F&amp;F, relieving, experience, and archival status change.</p><div class="workspace-link">Feeds: Payroll, HR Documents, Final Settlement</div></div>
+        <div class="card workspace-card"><div class="section-kicker">10</div><h3>Reports + Approvals + Alerts</h3><p>Pending approvals, probation due, document expiry, birthdays, anniversaries, headcount, and attrition visibility.</p><div class="workspace-link">Feeds from all core HR modules</div></div>
+      </div>
     </div>
 
     <div id="employeePage" class="page">
@@ -48,7 +92,7 @@
 
               <div class="form-row">
                 <label for="employeeId">Employee ID</label>
-                <input id="employeeId">
+                <input id="employeeId" readonly>
               </div>
 
               <div class="form-row">
@@ -102,8 +146,8 @@
               </div>
 
               <div class="form-row span-3">
-                <label for="address">Address</label>
-                <textarea id="address" rows="2"></textarea>
+                <label for="address">Primary Address</label>
+                <input id="address" placeholder="Enter primary employee address">
               </div>
 
               <div class="form-row">
@@ -409,6 +453,168 @@
       </div>
     </div>
 
+    <div id="policyPage" class="page" style="display:none">
+      <div class="layout full compact-app-grid policy-layout">
+        <div class="card list-card">
+          <div class="card-title-row">
+            <div>
+              <div class="section-kicker">Governance</div>
+              <h2>Company Policy Desk</h2>
+            </div>
+            <div class="mini-stat" id="policyCountBadge">0 Policies</div>
+          </div>
+          <div class="policy-company-shell">
+            <div class="section-kicker">Companies</div>
+            <ul id="policyCompanyList"></ul>
+          </div>
+          <div class="policy-list-head">
+            <h3 id="policySelectedCompanyTitle">Policies for selected company</h3>
+            <div class="preview-actions">
+              <button type="button" class="secondary-btn mini-btn" id="downloadPolicyPdfBtn">Download PDF</button>
+            </div>
+          </div>
+          <ul id="policyList"></ul>
+        </div>
+
+        <div class="card form-card">
+          <div class="card-title-row">
+            <div>
+              <div class="section-kicker">MNC Standard</div>
+              <h2>Policy Management</h2>
+            </div>
+            <div class="status-badge">HR Policy Suite</div>
+          </div>
+
+          <div class="policy-type-strip">
+            <button type="button" class="policy-chip" data-policy-template="hr">HR policy creation</button>
+            <button type="button" class="policy-chip" data-policy-template="attendance">Attendance policy</button>
+            <button type="button" class="policy-chip" data-policy-template="leave">Leave policy</button>
+            <button type="button" class="policy-chip" data-policy-template="salary">Salary policy</button>
+            <button type="button" class="policy-chip" data-policy-template="wfh">WFH policy</button>
+            <button type="button" class="policy-chip" data-policy-template="discipline">Discipline policy</button>
+          </div>
+
+          <form id="policyForm">
+            <input type="hidden" id="policyRecordId">
+
+            <div class="form-grid dense three-col">
+              <div class="form-row">
+                <label for="policyCompany">Company</label>
+                <select id="policyCompany"></select>
+              </div>
+
+              <div class="form-row">
+                <label for="policyType">Policy Type</label>
+                <select id="policyType">
+                  <option value="HR Policy">HR Policy</option>
+                  <option value="Attendance Policy">Attendance Policy</option>
+                  <option value="Leave Policy">Leave Policy</option>
+                  <option value="Salary Policy">Salary Policy</option>
+                  <option value="WFH Policy">WFH Policy</option>
+                  <option value="Discipline Policy">Discipline Policy</option>
+                </select>
+              </div>
+
+              <div class="form-row">
+                <label for="policyCode">Policy Code</label>
+                <input id="policyCode" placeholder="AUTO / MANUAL">
+              </div>
+
+              <div class="form-row span-3">
+                <label for="policyTitle">Policy Title</label>
+                <input id="policyTitle" placeholder="Ex: Attendance and Working Hours Policy">
+              </div>
+
+              <div class="form-row">
+                <label for="policyVersion">Version</label>
+                <input id="policyVersion" value="1.0">
+              </div>
+
+              <div class="form-row">
+                <label for="policyStatus">Status</label>
+                <select id="policyStatus">
+                  <option value="Draft">Draft</option>
+                  <option value="Active">Active</option>
+                  <option value="Under Review">Under Review</option>
+                  <option value="Archived">Archived</option>
+                </select>
+              </div>
+
+              <div class="form-row">
+                <label for="policyOwnerDepartment">Owner Dept.</label>
+                <input id="policyOwnerDepartment" value="Human Resources">
+              </div>
+
+              <div class="form-row">
+                <label for="policyEffectiveDate">Effective Date</label>
+                <input type="date" id="policyEffectiveDate">
+              </div>
+
+              <div class="form-row">
+                <label for="policyReviewDate">Review Date</label>
+                <input type="date" id="policyReviewDate">
+              </div>
+
+              <div class="form-row">
+                <label for="policyApproverName">Approver</label>
+                <input id="policyApproverName" placeholder="Chief HR Officer">
+              </div>
+
+              <div class="form-row span-3">
+                <label for="policySummary">Executive Summary</label>
+                <textarea id="policySummary" rows="2"></textarea>
+              </div>
+
+              <div class="form-row span-3">
+                <label for="policyPurpose">Purpose</label>
+                <textarea id="policyPurpose" rows="3"></textarea>
+              </div>
+
+              <div class="form-row span-3">
+                <label for="policyScope">Scope</label>
+                <textarea id="policyScope" rows="3"></textarea>
+              </div>
+
+              <div class="form-row span-3">
+                <label for="policyApplicability">Applicability</label>
+                <textarea id="policyApplicability" rows="3"></textarea>
+              </div>
+
+              <div class="form-row span-3">
+                <label for="policyRules">Policy Rules</label>
+                <textarea id="policyRules" rows="6"></textarea>
+              </div>
+
+              <div class="form-row span-3">
+                <label for="policyWorkflow">Approval Workflow</label>
+                <textarea id="policyWorkflow" rows="4"></textarea>
+              </div>
+
+              <div class="form-row span-3">
+                <label for="policyExceptions">Exceptions</label>
+                <textarea id="policyExceptions" rows="3"></textarea>
+              </div>
+
+              <div class="form-row span-3">
+                <label for="policyDisciplinaryAction">Disciplinary Action</label>
+                <textarea id="policyDisciplinaryAction" rows="3"></textarea>
+              </div>
+            </div>
+
+            <div class="button-row">
+              <button type="button" class="secondary-btn" id="resetPolicyBtn">Clear</button>
+              <button class="primary-btn">Save Policy</button>
+            </div>
+          </form>
+
+          <div class="policy-preview-shell">
+            <div class="section-kicker">Live Preview</div>
+            <div id="policyPreview" class="policy-preview-card"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div id="payslipPage" class="page" style="display:none">
       <div class="layout full payslip-layout">
         <div class="card form-card">
@@ -545,6 +751,20 @@
           </div>
 
           <div class="preview-grid two compact-preview-grid">
+            <div class="info-panel">
+              <h4>Employee Contact Snapshot</h4>
+              <table>
+                <tr><td>Primary Address</td><td id="pPrimaryAddress" class="preserve-lines"></td></tr>
+                <tr><td>Emergency Contact</td><td id="pEmergencyContact"></td></tr>
+              </table>
+            </div>
+            <div class="info-panel">
+              <h4>Dynamic Employee Fields</h4>
+              <div id="pEmployeeDynamicFields" class="dynamic-preview-list"></div>
+            </div>
+          </div>
+
+          <div class="preview-grid two compact-preview-grid">
             <div>
               <h4>Earnings</h4>
               <table class="earning-table">
@@ -609,6 +829,76 @@
 
           <div class="preview-actions">
             <button id="downloadPdfBtn" class="pdf-btn">Generate PDF</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="idCardPage" class="page" style="display:none">
+      <div class="layout full id-card-layout">
+        <div class="card form-card">
+          <div class="card-title-row">
+            <div>
+              <div class="section-kicker">Premium Add-On</div>
+              <h2>ID Card Generator</h2>
+            </div>
+            <div class="status-badge">Front + Back + PDF</div>
+          </div>
+
+          <form id="idCardForm">
+            <div class="form-grid dense two-col">
+              <div class="form-row">
+                <label for="idCardEmployeeSelect">Employee</label>
+                <select id="idCardEmployeeSelect"></select>
+              </div>
+
+              <div class="form-row">
+                <label for="idCardTemplateStyle">Template Style</label>
+                <select id="idCardTemplateStyle">
+                  <option value="royal-blue">Royal Blue</option>
+                  <option value="graphite-gold">Graphite Gold</option>
+                  <option value="emerald-dark">Emerald Dark</option>
+                </select>
+              </div>
+
+              <div class="form-row span-2">
+                <label for="idCardBackNote">Back Note</label>
+                <textarea id="idCardBackNote" rows="3" placeholder="Ex: If found please return to HR department."></textarea>
+              </div>
+            </div>
+
+            <div class="id-card-selling-points">
+              <span>Auto employee ID</span>
+              <span>Photo + logo</span>
+              <span>QR code</span>
+              <span>PDF download</span>
+            </div>
+
+            <div class="button-row">
+              <button type="button" class="secondary-btn" id="refreshIdCardBtn">Refresh Preview</button>
+              <button type="submit" class="primary-btn">Build ID Card</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="card preview-card">
+          <div class="preview-brand-bar">
+            <div>
+              <div class="section-kicker">Sellable Preview</div>
+              <h2 id="idCardPreviewTitle">Employee ID Card</h2>
+            </div>
+            <div class="preview-actions">
+              <button id="downloadIdCardPdfBtn" class="pdf-btn">Download PDF</button>
+            </div>
+          </div>
+
+          <div id="idCardPreviewEmpty" class="dynamic-preview-empty id-card-empty-state">
+            Select an employee and build the ID card preview.
+          </div>
+
+          <div id="idCardPreviewShell" class="id-card-preview-shell" style="display:none;">
+            <div id="idCardFrontPreview" class="id-card-canvas"></div>
+            <div id="idCardBackPreview" class="id-card-canvas"></div>
           </div>
         </div>
       </div>
@@ -708,11 +998,15 @@
 
   <script src="hrDocuments.js"></script>
   <script src="renderer.js"></script>
+  <script src="workspaceHub.js"></script>
   <script>
     function showPage(page, btn) {
+      document.getElementById('workspacePage').style.display = page === 'workspace' ? 'block' : 'none';
       document.getElementById('employeePage').style.display = page === 'employee' ? 'block' : 'none';
       document.getElementById('companyPage').style.display = page === 'company' ? 'block' : 'none';
+      document.getElementById('policyPage').style.display = page === 'policy' ? 'block' : 'none';
       document.getElementById('payslipPage').style.display = page === 'payslip' ? 'block' : 'none';
+      document.getElementById('idCardPage').style.display = page === 'idCard' ? 'block' : 'none';
       document.getElementById('hrPage').style.display = page === 'hr' ? 'block' : 'none';
       document.querySelectorAll('.tab-btn').forEach((b) => b.classList.remove('active'));
       btn.classList.add('active');
@@ -720,3 +1014,4 @@
   </script>
 </body>
 </html>
+
