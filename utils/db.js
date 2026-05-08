@@ -254,8 +254,11 @@ function get(sql, params = []) {
 
 function buildEmployeeIdPrefix(companyCode) {
   return String(companyCode || '')
-    .toUpperCase()
-    .replace(/[^A-Z0-9]/g, '');
+    .trim();
+}
+
+function escapeRegExp(value) {
+  return String(value || '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
 async function ensureColumns(tableName, columns) {
@@ -661,11 +664,11 @@ async function getNextEmployeeId(companyId, excludeEmployeeRecordId = null) {
     ? await all('SELECT employeeId FROM employees WHERE companyId = ? AND id != ?', [companyId, excludeEmployeeRecordId])
     : await all('SELECT employeeId FROM employees WHERE companyId = ?', [companyId]);
 
-  const employeeIdPattern = new RegExp(`^${prefix}(\\d+)$`);
+  const employeeIdPattern = new RegExp(`^${escapeRegExp(prefix)}(\\d+)$`, 'i');
   let maxSequence = 0;
 
   employees.forEach(({ employeeId }) => {
-    const match = String(employeeId || '').toUpperCase().match(employeeIdPattern);
+    const match = String(employeeId || '').match(employeeIdPattern);
     if (!match) {
       return;
     }
@@ -673,12 +676,46 @@ async function getNextEmployeeId(companyId, excludeEmployeeRecordId = null) {
     maxSequence = Math.max(maxSequence, Number(match[1]) || 0);
   });
 
-  return `${prefix}${String(maxSequence + 1).padStart(3, '0')}`;
+  return `${prefix}${maxSequence + 1}`;
+}
+
+async function ensureEmployeeIdAvailable(employeeId, excludeEmployeeRecordId = null) {
+  const normalizedEmployeeId = String(employeeId || '').trim();
+  if (!normalizedEmployeeId) {
+    return;
+  }
+
+  const existingEmployee = excludeEmployeeRecordId
+    ? await get(
+        'SELECT id FROM employees WHERE LOWER(TRIM(employeeId)) = LOWER(TRIM(?)) AND id != ? LIMIT 1',
+        [normalizedEmployeeId, excludeEmployeeRecordId]
+      )
+    : await get(
+        'SELECT id FROM employees WHERE LOWER(TRIM(employeeId)) = LOWER(TRIM(?)) LIMIT 1',
+        [normalizedEmployeeId]
+      );
+
+  if (existingEmployee) {
+    throw new Error('This employee id is reserved');
+  }
+}
+
+async function isEmployeeIdReserved(employeeId, excludeEmployeeRecordId = null) {
+  try {
+    await ensureEmployeeIdAvailable(employeeId, excludeEmployeeRecordId);
+    return false;
+  } catch (error) {
+    if (error.message === 'This employee id is reserved') {
+      return true;
+    }
+    throw error;
+  }
 }
 
 async function addEmployee(employee) {
   const resolvedEmployeeId = employee.employeeId?.trim()
     || await getNextEmployeeId(employee.companyId);
+  await ensureEmployeeIdAvailable(resolvedEmployeeId);
 
   const result = await run(
     `INSERT INTO employees (
@@ -728,6 +765,7 @@ async function addEmployee(employee) {
 async function updateEmployee(employee) {
   const resolvedEmployeeId = employee.employeeId?.trim()
     || await getNextEmployeeId(employee.companyId, employee.id);
+  await ensureEmployeeIdAvailable(resolvedEmployeeId, employee.id);
 
   return run(
     `UPDATE employees SET
@@ -813,6 +851,7 @@ module.exports = {
   deletePolicy,
   getEmployees,
   getNextEmployeeId,
+  isEmployeeIdReserved,
   addEmployee,
   updateEmployee,
   deleteEmployee

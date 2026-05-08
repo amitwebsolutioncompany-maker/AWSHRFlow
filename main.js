@@ -95,6 +95,7 @@ ipcMain.handle('update-policy', (event, policy) => db.updatePolicy(policy));
 ipcMain.handle('delete-policy', (event, id) => db.deletePolicy(id));
 ipcMain.handle('get-employees', () => db.getEmployees());
 ipcMain.handle('get-next-employee-id', (event, companyId, excludeEmployeeId) => db.getNextEmployeeId(companyId, excludeEmployeeId));
+ipcMain.handle('is-employee-id-reserved', (event, employeeId, excludeEmployeeId) => db.isEmployeeIdReserved(employeeId, excludeEmployeeId));
 ipcMain.handle('add-employee', (event, emp) => db.addEmployee(emp));
 ipcMain.handle('update-employee', (event, emp) => db.updateEmployee(emp));
 ipcMain.handle('delete-employee', (event, id) => db.deleteEmployee(id));

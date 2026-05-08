@@ -29,6 +29,7 @@
       <button class="tab-btn" onclick="showPage('idCard', this)">ID Card Generator</button>
       <button class="tab-btn" onclick="showPage('workspace', this)">HR Flow Hub</button>
       <button class="tab-btn" onclick="showPage('policy', this)">Policy Management</button>
+      <button type="button" class="tab-btn refresh-app-btn" id="refreshAppBtn">Refresh</button>
     </div>
 
     <div id="workspacePage" class="page" style="display:none">
@@ -92,7 +93,7 @@
 
               <div class="form-row">
                 <label for="employeeId">Employee ID</label>
-                <input id="employeeId" readonly>
+                <input id="employeeId" >
               </div>
 
               <div class="form-row">
@@ -231,6 +232,8 @@
                 <div id="employeeCustomFields" class="dynamic-field-list"></div>
               </div>
             </div>
+
+            <div class="form-message" id="employeeFormMessage"></div>
 
             <div class="button-row">
               <button type="button" class="secondary-btn" id="resetEmployeeBtn">Clear</button>
@@ -1014,4 +1017,3 @@
   </script>
 </body>
 </html>
-

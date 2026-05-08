@@ -128,6 +128,10 @@ body.auth-locked .app-shell {
   color: #16110a;
 }
 
+.refresh-app-btn {
+  margin-left: auto;
+}
+
 .page {
   animation: fadeIn 0.2s ease;
 }
@@ -679,6 +683,26 @@ textarea:focus {
   font-size: 11px;
   letter-spacing: 0.03em;
   white-space: nowrap;
+}
+
+.form-message {
+  min-height: 18px;
+  margin-top: 10px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.form-message.error {
+  color: #ffb3b3;
+}
+
+.form-message.success {
+  color: #9df0c5;
+}
+
+.form-message.info {
+  color: var(--gold-soft);
 }
 
 .primary-btn,

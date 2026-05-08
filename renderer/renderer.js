@@ -12,6 +12,7 @@ let editingEmployeeId = null;
 let editingCompanyId = null;
 let editingPolicyId = null;
 let selectedPolicyCompanyId = null;
+let employeeSaveInProgress = false;
 const MAX_CUSTOM_FIELDS = 4;
 let employeeCustomFieldsState = [];
 let companyCustomFieldsState = [];
@@ -43,6 +44,8 @@ const refreshIdCardBtn = document.getElementById('refreshIdCardBtn');
 const downloadIdCardPdfBtn = document.getElementById('downloadIdCardPdfBtn');
 const resetEmployeeBtn = document.getElementById('resetEmployeeBtn');
 const resetCompanyBtn = document.getElementById('resetCompanyBtn');
+const refreshAppBtn = document.getElementById('refreshAppBtn');
+const employeeFormMessage = document.getElementById('employeeFormMessage');
 const addEmployeeFieldBtn = document.getElementById('addEmployeeFieldBtn');
 const addCompanyFieldBtn = document.getElementById('addCompanyFieldBtn');
 const employeeCustomFieldsWrap = document.getElementById('employeeCustomFields');
@@ -557,6 +560,14 @@ function formatCurrency(value) {
   return `Rs. ${numberValue(value).toFixed(2)}`;
 }
 
+function setEmployeeFormMessage(message = '', type = '') {
+  if (!employeeFormMessage) {
+    return;
+  }
+  employeeFormMessage.textContent = message;
+  employeeFormMessage.className = `form-message${type ? ` ${type}` : ''}`;
+}
+
 function buildEmployeeIdPrefix(companyCode) {
   return String(companyCode || '')
     .toUpperCase()
@@ -828,7 +839,8 @@ function addCustomField(scope) {
 }
 
 function buildCompanyPayload() {
-  const code = slugify(companyFields.code.value || companyFields.displayName.value || companyFields.legalName.value);
+  const code = companyFields.code.value.trim()
+    || slugify(companyFields.displayName.value || companyFields.legalName.value);
   return {
     id: editingCompanyId,
     code,
@@ -915,6 +927,7 @@ function resetEmployeeForm() {
   editingEmployeeId = null;
   employeeProfilePhotoData = '';
   employeeCustomFieldsState = [];
+  setEmployeeFormMessage('');
   employeeFields.employeeId.dataset.autoValue = '';
   employeeForm.reset();
   employeeFields.empId.value = '';
@@ -956,12 +969,13 @@ function resetPolicyForm() {
 }
 
 function editEmployee(employee) {
+  setEmployeeFormMessage('');
   editingEmployeeId = employee.id;
   employeeProfilePhotoData = employee.profilePhoto || '';
   employeeFields.empId.value = employee.id || '';
   employeeFields.name.value = employee.name || '';
   employeeFields.employeeId.value = employee.employeeId || '';
-  employeeFields.employeeId.dataset.autoValue = employee.employeeId || '';
+  employeeFields.employeeId.dataset.autoValue = '';
   employeeFields.designation.value = employee.designation || '';
   employeeFields.department.value = employee.department || '';
   employeeFields.company.value = employee.companyId || '';
@@ -1938,24 +1952,60 @@ employeeFields.company.addEventListener('change', async () => {
   await syncEmployeeIdPreview(true);
 });
 
+if (refreshAppBtn) {
+  refreshAppBtn.addEventListener('click', async () => {
+    setEmployeeFormMessage('Refreshing data...', 'info');
+    closeAllSearchableSelects();
+    try {
+      await refreshAllData();
+      setEmployeeFormMessage('Data refreshed.', 'success');
+    } catch (error) {
+      setEmployeeFormMessage('Unable to refresh data. Please try again.', 'error');
+    }
+  });
+}
+
 employeeForm.addEventListener('submit', async (event) => {
   event.preventDefault();
-  await syncEmployeeIdPreview(true);
-  const payload = buildEmployeePayload();
-
-  if (!payload.name || !payload.companyId) {
-    alert('Employee name and company are required.');
+  if (employeeSaveInProgress) {
     return;
   }
 
-  if (editingEmployeeId) {
-    await window.api.updateEmployee(payload);
-  } else {
-    await window.api.addEmployee(payload);
-  }
+  employeeSaveInProgress = true;
+  setEmployeeFormMessage('');
 
-  resetEmployeeForm();
-  await refreshAllData();
+  try {
+    await syncEmployeeIdPreview(false);
+    const payload = buildEmployeePayload();
+
+    if (!payload.name || !payload.companyId) {
+      setEmployeeFormMessage('Employee name and company are required.', 'error');
+      employeeFields.name.focus();
+      return;
+    }
+
+    if (payload.employeeId && await window.api.isEmployeeIdReserved(payload.employeeId, editingEmployeeId)) {
+      setEmployeeFormMessage('This employee id is reserved', 'error');
+      employeeFields.employeeId.focus();
+      return;
+    }
+
+    if (editingEmployeeId) {
+      await window.api.updateEmployee(payload);
+    } else {
+      await window.api.addEmployee(payload);
+    }
+
+    resetEmployeeForm();
+    await refreshAllData();
+  } catch (error) {
+    const message = String(error?.message || '');
+    setEmployeeFormMessage(message.includes('This employee id is reserved')
+      ? 'This employee id is reserved'
+      : 'Unable to save employee. Please try again.', 'error');
+  } finally {
+    employeeSaveInProgress = false;
+  }
 });
 
 companyForm.addEventListener('submit', async (event) => {
@@ -2361,7 +2411,7 @@ async function initializeApp() {
   payslipInputs.yearSelect.value = new Date().getFullYear();
   payslipInputs.attendance.value = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate();
   employeeFields.employmentType.value = 'Full Time';
-  employeeFields.employeeId.readOnly = true;
+  employeeFields.employeeId.readOnly = false;
   companyFields.country.value = 'India';
   companyFields.paymentMode.value = 'Bank Transfer';
   idCardBackNote.value = 'This card is company property. If found, please return it to the HR department immediately.';

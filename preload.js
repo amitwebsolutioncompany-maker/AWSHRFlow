@@ -11,6 +11,7 @@ contextBridge.exposeInMainWorld('api', {
   deletePolicy: (id) => ipcRenderer.invoke('delete-policy', id),
   getEmployees: () => ipcRenderer.invoke('get-employees'),
   getNextEmployeeId: (companyId, excludeEmployeeId) => ipcRenderer.invoke('get-next-employee-id', companyId, excludeEmployeeId),
+  isEmployeeIdReserved: (employeeId, excludeEmployeeId) => ipcRenderer.invoke('is-employee-id-reserved', employeeId, excludeEmployeeId),
   addEmployee: (emp) => ipcRenderer.invoke('add-employee', emp),
   updateEmployee: (emp) => ipcRenderer.invoke('update-employee', emp),
   deleteEmployee: (id) => ipcRenderer.invoke('delete-employee', id),
