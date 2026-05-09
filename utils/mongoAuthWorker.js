@@ -7,6 +7,7 @@ const ENV_FILE = path.join(__dirname, '..', '.env.local');
 const DB_NAME = 'AWSHRFlow';
 const COLLECTION_NAME = 'app_auth';
 const PASSWORD_KEY = 'app-password';
+const PASSWORD_KEYS = [PASSWORD_KEY, 'app-password2'];
 const DEFAULT_PASSWORD = 'awshrflow@3401';
 
 function loadEnvFile() {
@@ -141,15 +142,19 @@ async function init() {
 
 async function verify(password) {
   return connectWithFallback(async (collection) => {
-    const passwordDoc = await collection.findOne({ _id: PASSWORD_KEY });
-    if (!passwordDoc) {
+    const passwordDocs = await collection.find({ _id: { $in: PASSWORD_KEYS } }).toArray();
+    if (!passwordDocs.length) {
       return {
         success: false,
         message: 'Password record was not found in MongoDB.'
       };
     }
 
-    if (String(password || '') !== String(passwordDoc.password || '')) {
+    const hasMatchingPassword = passwordDocs.some((passwordDoc) => (
+      String(password || '') === String(passwordDoc.password || '')
+    ));
+
+    if (!hasMatchingPassword) {
       return {
         success: false,
         message: 'Invalid password. App access denied.'
